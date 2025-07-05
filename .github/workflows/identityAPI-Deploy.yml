@@ -39,4 +39,6 @@ jobs:
         run: dotnet build ./IdentityAPI/IdentityAPI.csproj --configuration Release --no-restore
 
       - name: Create bundle
-        run: dotnet ef migrations bundle --project ./IdentityAPI/IdentityAPI.csproj --output bundle
+        run: |
+          cd ./IdentityAPI
+          dotnet ef migrations bundle --project ./IdentityAPI.csproj --output bundle
