@@ -32,7 +32,7 @@ jobs:
       - name: Install dotnet-ef
         run: dotnet tool install --global dotnet-ef
     
-      - name: Restore $IdentityAPI
+      - name: Restore IdentityAPI
         run: dotnet restore ./IdentityAPI/IdentityAPI.csproj --locked-mode
 
       - name: Build IdentityAPI
@@ -44,4 +44,6 @@ jobs:
           dotnet ef migrations bundle --project ./IdentityAPI.csproj --output bundle
 
       - name: Apply migration
-        run: ./efbundle --connection "${{ secrets.IDENTITY_DB_CONNECTION_STRING }}"
+        run: |
+          cd ./IdentityAPI
+          ./efbundle --connection "${{ secrets.IDENTITY_DB_CONNECTION_STRING }}"
