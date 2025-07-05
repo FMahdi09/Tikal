@@ -11,22 +11,32 @@ permissions:
 
 jobs:
   test:
-    name: workflow test
+    name: Migrate database
     runs-on: tikal-azure-runner
+    strategy:
+      matrix:
+        dotnet-version: ["9.0.X"]
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: Setup Azure CLI
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Azure CLI script
-        uses: azure/cli@v2
+      - name: Setup dotnet ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v4
         with:
-          azcliversion: latest
-          inlineScript: |
-            az account show
+          dotnet-version: ${{ matrix.dotnet-version }}
+          cache: true
+          cache-dependency-path: './IdentityAPI/packages.lock.json'
+    
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef
+    
+      - name: Restore $IdentityAPI
+        run: dotnet restore ./IdentityAPI/IdentityAPI.csproj --locked-mode
+
+      - name: Build IdentityAPI
+        run: dotnet build ./IdentityAPI/IdentityAPI.csproj --configuration Release --no-restore
+
+      - name: Create bundle
+        run: dotnet ef migrations bundle --project ./IdentityAPI/IdentityAPI.csproj --output bundle
