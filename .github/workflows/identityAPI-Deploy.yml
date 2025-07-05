@@ -44,4 +44,6 @@ jobs:
           dotnet ef migrations bundle --project ./IdentityAPI.csproj --output efbundle
 
       - name: Apply migration
-        run: ./efbundle --connection "${{ secrets.IDENTITY_DB_CONNECTION_STRING }}"
+        run: |
+          cd ./IdentityAPI
+          ./efbundle --connection "${{ secrets.IDENTITY_DB_CONNECTION_STRING }}"
